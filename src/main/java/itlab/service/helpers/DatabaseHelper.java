@@ -1,15 +1,21 @@
 package itlab.service.helpers;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DatabaseHelper {
     public static List<String> getAllSavedDatabases() {
-        String PATH = "/remote/dir/server/";
-        String directoryName = PATH.concat("database/");
+        String directoryName = getFilePath() + "\\databases\\";
         List<String> dbs = new LinkedList<>();
         File folder = new File(directoryName);
+        if (!folder.exists()){
+            folder.mkdirs();
+                    return dbs;
+        }
         for (File fileEntry : folder.listFiles()
                 ) {
             if (fileEntry.isFile()) {
@@ -26,6 +32,20 @@ public class DatabaseHelper {
             }
         }
         return dbs;
+    }
+    private static String getFilePath() {
+        return new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
+    }
+
+    public static void delete(String databaseName){
+        String directoryName = getFilePath() + "\\databases\\";
+        String filename = databaseName + ".db";
+        File f = new File(directoryName + filename);
+        try {
+            FileUtils.forceDelete(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

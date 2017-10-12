@@ -7,6 +7,7 @@ import itlab.module.exceptions.NonExistingTable;
 import itlab.module.exceptions.TableAlreadyExsists;
 import itlab.module.exceptions.UnsupportedValueException;
 import itlab.module.types.Types;
+import itlab.service.helpers.DatabaseHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,6 @@ public class test {
     }
     private static void delete(){
         Database database = new Database("TestDB");
-        database.delete();
+        DatabaseHelper.delete("TestDB");
     }
 }

@@ -2,6 +2,7 @@ package itlab.module;
 
 import itlab.module.exceptions.NonExistingTable;
 import itlab.module.exceptions.TableAlreadyExsists;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -45,13 +46,12 @@ public class Database implements Serializable {
 
         if (tables.containsKey(name))
             return tables.get(name);
-        else throw new NonExistingTable("Table " + name +" in database " + this.name + " not exists");
+        else throw new NonExistingTable("Table " + name + " in database " + this.name + " not exists");
     }
 
     public void save() {
         try {
-            String PATH = "/remote/dir/server/";
-            String directoryName = PATH.concat("database/");
+            String directoryName = getFilePath() + "\\databases\\";
             String filename = name + ".db";
 
             File directory = new File(directoryName);
@@ -74,8 +74,7 @@ public class Database implements Serializable {
 
     public void load() {
         try {
-            String PATH = "/remote/dir/server/";
-            String directoryName = PATH.concat("database/");
+            String directoryName = getFilePath() + "\\databases\\";
             String filename = name + ".db";
 
             File directory = new File(directoryName);
@@ -94,46 +93,32 @@ public class Database implements Serializable {
         }
     }
 
-    public void delete() {
-        String PATH = "/remote/dir/server/";
-        String directoryName = PATH.concat("database/");
-        String filename = name + ".db";
-
-//        File directory = new File(directoryName);
-//        if (!directory.exists()) {
-//            directory.mkdirs();
-//            // If you require it to make the entire directory path including parents,
-//            // use directory.mkdirs(); here instead.
-//        }
-        File f = new File(directoryName + filename);
-        boolean b= f.delete();
-        System.out.println(b);
-    }
 
     public List<Row> substractTables(String table1, String table2) throws NonExistingTable {
-        if(tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
+        if (tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
         Table first = tables.get(table1);
         Table second = tables.get(table2);
-        if(!first.getScheme().equals(second.getScheme())) return null;
+        if (!first.getScheme().equals(second.getScheme())) return null;
 
-        List<Row> firstList=new ArrayList(first.getRows().values());
-        List<Row> firstListTemp=new ArrayList(first.getRows().values());
-        List<Row> secondList=new ArrayList(second.getRows().values());
+        List<Row> firstList = new ArrayList(first.getRows().values());
+        List<Row> firstListTemp = new ArrayList(first.getRows().values());
+        List<Row> secondList = new ArrayList(second.getRows().values());
         firstList.removeAll(secondList);
         secondList.removeAll(firstListTemp);
         firstList.addAll(secondList);
 
         return firstList;
     }
-    public List<Row> intersectionTable(String table1, String table2) throws NonExistingTable{
-        if(tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
+
+    public List<Row> intersectionTable(String table1, String table2) throws NonExistingTable {
+        if (tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
         Table first = tables.get(table1);
         Table second = tables.get(table2);
-        if(!first.getScheme().equals(second.getScheme())) return null;
+        if (!first.getScheme().equals(second.getScheme())) return null;
 
-        List<Row> firstList=new ArrayList(first.getRows().values());
-        List<Row> firstListTemp=new ArrayList(first.getRows().values());
-        List<Row> secondList=new ArrayList(second.getRows().values());
+        List<Row> firstList = new ArrayList(first.getRows().values());
+        List<Row> firstListTemp = new ArrayList(first.getRows().values());
+        List<Row> secondList = new ArrayList(second.getRows().values());
         firstList.removeAll(secondList);
         firstListTemp.removeAll(firstList);
         return firstListTemp;
@@ -145,5 +130,9 @@ public class Database implements Serializable {
                 "tables=" + tables +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    private String getFilePath() {
+        return new File(ClassLoader.getSystemClassLoader().getResource(".").getPath()).getAbsolutePath();
     }
 }

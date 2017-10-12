@@ -32,7 +32,13 @@ public class DatabaseControllerDirect  implements DatabaseController {
 
     @Override
     public void deleteDatabase(String name) {
-        dbInMemory.get(name).delete();
+        dbInMemory.remove(name);
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        DatabaseHelper.delete(name);
     }
 
     @Override
