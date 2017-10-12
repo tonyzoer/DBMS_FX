@@ -15,11 +15,18 @@ public class CharInvT extends Type {
 
 
     public void setValue(String value) {
-        for (char c:value.toCharArray()
+        if (value==null||value==""){value="";}else
+        for (
+                char c:value.toCharArray()
              ) {
             if (!alphabet.contains(c)){}
         }
         this.value = value;
+    }
+
+    @Override
+    public String getStringValue() {
+        return value;
     }
 
     @Override

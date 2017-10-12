@@ -12,18 +12,22 @@ public class IntegerT extends Type {
     @Override
     public void setValue(String s) throws UnsupportedValueException {
         try {
-            value = Integer.parseInt(s);
+            if (s == null||s.equals("")) {
+                value = Integer.MIN_VALUE;
+            } else
+                value = Integer.parseInt(s);
         } catch (NumberFormatException e) {
             throw new UnsupportedValueException(value + "not suported for class Integer", e);
         }
     }
 
-    public Integer getValue() {
-        return value;
+    @Override
+    public String getStringValue() {
+        return value.toString();
     }
 
-    public void setValue(Integer value) {
-        this.value = value;
+    public Integer getValue() {
+        return value;
     }
 
     @Override

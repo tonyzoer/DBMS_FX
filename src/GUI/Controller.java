@@ -5,16 +5,22 @@ import itlab.module.exceptions.UnsupportedValueException;
 import itlab.service.controllers.DatabaseController;
 import itlab.service.controllers.DatabaseControllerDirect;
 import itlab.view.IView;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -29,15 +35,17 @@ public class Controller implements Initializable, IView {
     private ListView<String> all_databases_list;
     @FXML
     private ListView<String> tables_list;
-
+    @FXML
+    private TableView table;
 
     private ObservableList<String> tables;
     private ObservableList<String> databases;
-
+    private ObservableList<ObservableList> data;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         databases = FXCollections.observableArrayList();
         tables = FXCollections.observableArrayList();
+        data = FXCollections.observableArrayList();
         all_databases_list.setItems(databases);
         tables_list.setItems(tables);
         showAllDatabases();
@@ -121,7 +129,44 @@ public class Controller implements Initializable, IView {
     public void showTable(String databaseName, String tableName) {
         //TODO make it beautiful
         try {
-            System.out.println(DatabaseControllerDirect.getInstance().getTableRows(databaseName, tableName));
+            table.getItems().clear();
+            table.getColumns().clear();
+            List<String> tableSchemeColumnNames = new ArrayList<String>(DatabaseControllerDirect.getInstance().getTableScheme(databaseName, tableName).keySet());
+            TableColumn uuidCol=new TableColumn("UUID");
+            uuidCol.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
+                public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                    return new SimpleStringProperty(param.getValue().get(tableSchemeColumnNames.size()).toString());
+                }
+            });
+            table.getColumns().add(uuidCol);
+            for (int i=0;i<tableSchemeColumnNames.size();i++
+                    ) {
+                TableColumn column=new TableColumn(tableSchemeColumnNames.get(i));
+                final int j=i;
+                column.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
+
+                table.getColumns().addAll(column);
+            }
+
+            Map<String,Map<String,String>> rows=DatabaseControllerDirect.getInstance().getTableRowsAsMap(databaseName,tableName);
+            for (Map.Entry<String, Map<String, String>> entry:rows.entrySet()
+            ){
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 0; i < tableSchemeColumnNames.size(); i++) {
+                    row.add(entry.getValue().get(tableSchemeColumnNames.get(i)));
+                }
+                row.add(entry.getKey());
+                data.add(row);
+
+//                GenericRowModel row=new GenericRowModel(values);
+//                table.setItems(this.rows);
+            }
+            table.setItems(data);
+
         } catch (NonExistingTable nonExistingTable) {
             nonExistingTable.printStackTrace();
         }

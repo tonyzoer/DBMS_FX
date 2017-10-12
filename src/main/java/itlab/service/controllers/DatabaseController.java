@@ -14,6 +14,7 @@ public interface DatabaseController {
   public abstract void loadDatabase(String name) throws NonExistingFile;
   public abstract void addTable(String databaseName, String tableName, Map<String, String> columns) ;
   public abstract Map<String , String> getTableRows(String databaseName, String tableName) throws NonExistingTable;
+  public abstract Map<String,Map<String,String>> getTableRowsAsMap(String databaseName, String tableName) throws NonExistingTable;
   public abstract Map<String,String> getTableScheme(String databaseName, String tableName) throws NonExistingTable;
   public abstract void removeTable(String databaseName, String tableName) throws NonExistingTable;
   public abstract void renameTable(String databaseName, String tableNameCurrent, String tableNameNew) throws NonExistingTable;

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class test {
     public static void main(String[] args) throws UnsupportedValueException, TableAlreadyExsists, NonExistingTable {
-        load();
+        save();
     }
     private static void load(){
         Database database = new Database("TestDB");
@@ -34,7 +34,14 @@ public class test {
         columnValue.put("id","1");
         columnValue.put("user","SUPERUSER");
         String rowUuid = t.addRow(columnValue);
+        String rowUuid2 = t.addRow(columnValue);
+        HashMap<String,String> columnValue3=new HashMap<>();
+        columnValue.put("id","3");
+        columnValue.put("user","SUPERUSER3");
+        String uuid3= t.addRow(columnValue3);
         System.out.println(t.getRow(rowUuid));
+        System.out.println(t.getRow(rowUuid2));
+        System.out.println(t.getRow(uuid3));
         database.save();
     }
     private static void delete(){

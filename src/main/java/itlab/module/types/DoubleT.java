@@ -19,12 +19,19 @@ public class DoubleT extends Type {
         }
     }
 
+    @Override
+    public String getStringValue() {
+        return value.toString();
+    }
+
 
     public Double getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Double s) {
+
+        if (s==null||s.equals("")){this.value=Double.MIN_VALUE;}else
         this.value = value;
     }
 

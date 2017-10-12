@@ -52,7 +52,14 @@ public class Row implements Serializable {
 
     }
 
-
+    public Map<String,String> getValues(){
+        Map<String,String> stringMapValues=new HashMap<>();
+        for (Map.Entry<String,Type> entry: values.entrySet()
+             ) {
+            stringMapValues.put(entry.getKey(),entry.getValue().getStringValue());
+        }
+        return stringMapValues;
+    }
     @Override
     public String toString() {
         return "Row{" +

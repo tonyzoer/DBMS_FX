@@ -36,11 +36,19 @@ public class TimeT extends Type {
 
     @Override
     public void setValue(String s) throws UnsupportedValueException {
-        try {
-            value = LocalTime.parse(s, DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
-        }catch (DateTimeException ex){
-            throw new UnsupportedValueException(s+" not suportet value for Time Type",ex);
-        }
+        if (s == null||s.equals("")) {
+            value = LocalTime.MIDNIGHT;
+        } else
+            try {
+                value = LocalTime.parse(s, DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
+            } catch (DateTimeException ex) {
+                throw new UnsupportedValueException(s + " not suportet value for Time Type", ex);
+            }
+    }
+
+    @Override
+    public String getStringValue() {
+        return value.toString();
     }
 
     @Override

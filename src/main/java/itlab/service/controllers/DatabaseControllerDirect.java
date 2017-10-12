@@ -90,6 +90,18 @@ public class DatabaseControllerDirect  implements DatabaseController {
     }
 
     @Override
+    public Map<String, Map<String, String>> getTableRowsAsMap(String databaseName, String tableName) throws NonExistingTable {
+        Map<String, Row> rows = dbInMemory.get(databaseName).getTable(tableName).getRows();
+        Map<String, Map<String,String>> rowsMap = new HashMap<>();
+        for (Map.Entry<String, Row> row : rows.entrySet()
+                ) {
+            rowsMap.put(row.getKey(), row.getValue().getValues());
+        }
+        return rowsMap;
+    }
+
+
+    @Override
     public Map<String, String> getTableScheme(String databaseName, String tableName) throws NonExistingTable {
         Map<String, String> collums = new HashMap<>();
         for (Map.Entry<String, Types> col : dbInMemory.get(databaseName).getTable(tableName).getScheme().getColumns().entrySet()

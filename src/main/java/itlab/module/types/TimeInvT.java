@@ -10,6 +10,7 @@ public class TimeInvT extends Type {
 
     LocalTime begin;
     LocalTime end;
+
     TimeInvT(String s) throws UnsupportedValueException {
         super(s);
     }
@@ -29,7 +30,6 @@ public class TimeInvT extends Type {
     public void setEnd(LocalTime end) {
         this.end = end;
     }
-
 
 
     @Override
@@ -53,22 +53,31 @@ public class TimeInvT extends Type {
 
     @Override
     public void setValue(String s) throws UnsupportedValueException {
-    try{
-        String[] si=s.split("/");
-        if (si.length==2){
-        begin= LocalTime.parse(si[0], DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
-        end= LocalTime.parse(si[1], DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
-        }else{
-            throw new UnsupportedValueException("Not founded time splitter or more then 1 for type TimeInterval");
-        }
-    }catch (DateTimeException ex){
-        throw new UnsupportedValueException(s+" not suportet value for TimeInterval Type",ex);
+        if (s == null||s.equals("")) {
+            begin = LocalTime.MIDNIGHT;
+            end = LocalTime.MIDNIGHT;
+        } else
+            try {
+                String[] si = s.split("/");
+                if (si.length == 2) {
+                    begin = LocalTime.parse(si[0], DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
+                    end = LocalTime.parse(si[1], DateTimeFormatter.ofPattern("HH:mm:ss[.ssssss]"));
+                } else {
+                    throw new UnsupportedValueException("Not founded time splitter or more then 1 for type TimeInterval");
+                }
+            } catch (DateTimeException ex) {
+                throw new UnsupportedValueException(s + " not suportet value for TimeInterval Type", ex);
+            }
     }
+
+    @Override
+    public String getStringValue() {
+        return begin.toString() + "-" + end.toString();
     }
 
     @Override
     public String toString() {
-        return "TimeInvT{" +"value={"+
+        return "TimeInvT{" + "value={" +
                 "begin=" + begin +
                 ", end=" + end +
                 "}}";
