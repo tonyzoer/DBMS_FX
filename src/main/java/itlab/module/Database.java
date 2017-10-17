@@ -94,7 +94,7 @@ public class Database implements Serializable {
     }
 
 
-    public List<Row> substractTables(String table1, String table2) throws NonExistingTable {
+    public List<Row> substractTables(String table1, String table2,String newTableName) throws NonExistingTable, TableAlreadyExsists {
         if (tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
         Table first = tables.get(table1);
         Table second = tables.get(table2);
@@ -106,11 +106,15 @@ public class Database implements Serializable {
         firstList.removeAll(secondList);
         secondList.removeAll(firstListTemp);
         firstList.addAll(secondList);
-
+        this.createTable(newTableName,tables.get(table1).getScheme());
+        for (Row row:firstList
+             ) {
+            tables.get(newTableName).addRow(row);
+        }
         return firstList;
     }
 
-    public List<Row> intersectionTable(String table1, String table2) throws NonExistingTable {
+    public List<Row> intersectionTable(String table1, String table2,String newTableName) throws NonExistingTable, TableAlreadyExsists {
         if (tables.get(table1) == null || tables.get(table2) == null) throw new NonExistingTable();
         Table first = tables.get(table1);
         Table second = tables.get(table2);
@@ -121,6 +125,11 @@ public class Database implements Serializable {
         List<Row> secondList = new ArrayList(second.getRows().values());
         firstList.removeAll(secondList);
         firstListTemp.removeAll(firstList);
+        this.createTable(newTableName,tables.get(table1).getScheme());
+        for (Row row:firstListTemp
+                ) {
+            tables.get(newTableName).addRow(row);
+        }
         return firstListTemp;
     }
 

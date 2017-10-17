@@ -81,6 +81,7 @@ public class Row implements Serializable {
         return true;
     }
 
+
     @Override
     public int hashCode() {
         return values != null ? values.hashCode() : 0;

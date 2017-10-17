@@ -131,13 +131,23 @@ public class DatabaseControllerDirect implements DatabaseController {
     }
 
     @Override
-    public void tableIntersection(String table1, String table2, String newTableName) {
+    public void tableIntersection(String table1, String table2, String newTableName) throws NonExistingTable {
 
     }
 
     @Override
-    public void tableDifference(String table1, String table2, String newTableName) {
+    public void tableIntersection(String database, String table1, String table2, String newTableName) throws NonExistingTable, TableAlreadyExsists {
+        dbInMemory.get(database).intersectionTable(table1,table2,newTableName);
+    }
 
+    @Override
+    public void tableDifference(String table1, String table2, String newTableName) throws NonExistingTable {
+
+    }
+
+    @Override
+    public void tableDifference(String database, String table1, String table2, String newTableName) throws NonExistingTable, TableAlreadyExsists {
+        dbInMemory.get(database).substractTables(table1,table2,newTableName);
     }
 
     @Override

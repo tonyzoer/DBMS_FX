@@ -27,7 +27,7 @@ public class DatabaseTest {
         };
         db.createTable("Table1", new Scheme(scheme));
         db.createTable("Table2", new Scheme(scheme));
-        List<Row> result = db.substractTables("Table1", "Table2");
+        List<Row> result = db.substractTables("Table1", "Table2","Table1_Table2_differ");
         Assert.assertTrue(result.isEmpty());
     }
 
@@ -65,7 +65,7 @@ public class DatabaseTest {
         db.getTable("Table2").addRow(row1);
         db.getTable("Table2").addRow(row3);
         db.getTable("Table1").addRow(row2);
-        List<Row> result = db.substractTables("Table1", "Table2");
+        List<Row> result = db.substractTables("Table1", "Table2","Table1_Table2_differ");
         Assert.assertTrue(result.size() == 2);
     }
 
@@ -103,7 +103,7 @@ public class DatabaseTest {
         db.getTable("Table2").addRow(row1);
         db.getTable("Table2").addRow(row3);
         db.getTable("Table1").addRow(row2);
-        List<Row> result = db.intersectionTable("Table1", "Table2");
+        List<Row> result = db.intersectionTable("Table1", "Table2","Table1_Table2_intersection");
         Assert.assertTrue(result.size() == 1);
     }
 

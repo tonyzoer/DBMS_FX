@@ -32,5 +32,7 @@
     <Button fx:id="delete_table" layoutX="121.0" layoutY="723.0" mnemonicParsing="false" onAction="#deleteTable" prefWidth="93.0" text="Delete" />
     <Button layoutX="223.0" layoutY="724.0" mnemonicParsing="false" onAction="#openNewTablePane" text="Create Table" />
     <Button layoutX="251.0" layoutY="630.0" mnemonicParsing="false" onAction="#addEmptyRow" text="Add Row" />
+    <Button layoutX="254.0" layoutY="666.0" mnemonicParsing="false" onAction="#intersect" text="Intersection" />
+    <Button layoutX="254.0" layoutY="697.0" mnemonicParsing="false" onAction="#substract" text="Substract" />
   </children>
 </AnchorPane>

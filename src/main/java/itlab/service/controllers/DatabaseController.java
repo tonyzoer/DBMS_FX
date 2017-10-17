@@ -22,7 +22,13 @@ public interface DatabaseController {
   public abstract void removeRowFromTable(String databaseName, String tableName, String rowUUID) throws NonExistingRow, NonExistingTable;
   public abstract void updateRowInTable(String databaseName, String tableName, String rowUUID, Map<String, String> columnValues) throws NonExistingTable,NonExistingColumn,UnsupportedValueException;
   public abstract void tableIntersection(String table1, String table2, String newTableName) throws NonExistingTable;
-  public abstract void tableDifference(String table1, String table2, String newTableName)throws NonExistingTable;
+
+    void tableIntersection(String database, String table1, String table2, String newTableName) throws NonExistingTable, TableAlreadyExsists;
+
+    public abstract void tableDifference(String table1, String table2, String newTableName)throws NonExistingTable;
+
+  void tableDifference(String database, String table1, String table2, String newTableName) throws NonExistingTable, TableAlreadyExsists;
+
   public List<String> getAllDatabases();
   public List<String> getAllTables(String databaseName);
 

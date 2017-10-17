@@ -43,7 +43,11 @@ public class Table implements Serializable {
         rows.put(uuid, new Row(scheme, values));
         return uuid;
     }
-
+    public  String addRow(Row row){
+        String uuid=UUID.randomUUID().toString();
+        rows.put(uuid,row);
+        return uuid;
+    }
     public Row getRow(String uuid) {
         return rows.get(uuid);
     }

@@ -58,6 +58,7 @@ public class MainController implements Initializable, IView {
         data = FXCollections.observableArrayList();
         all_databases_list.setItems(databases);
         tables_list.setItems(tables);
+        tables_list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         showAllDatabases();
     }
 
@@ -146,6 +147,34 @@ public class MainController implements Initializable, IView {
         row.add(UUID);
         data.add(row);
 
+    }
+    @FXML
+    private void intersect(ActionEvent event){
+    ObservableList<String> selected= tables_list.getSelectionModel().getSelectedItems();
+    if (selected.size()!=2){
+        Alert alert=new Alert(Alert.AlertType.INFORMATION,"Select 2 tables");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            alert.close();
+        }
+    }else{
+        tableIntersection(selected.get(0),selected.get(1),selected.get(0)+"_"+selected.get(1)+"_intersection");
+        tables.add(selected.get(0)+"_"+selected.get(1)+"_intersection");
+    }
+    }
+    @FXML
+    private void substract(ActionEvent event){
+        ObservableList<String> selected= tables_list.getSelectionModel().getSelectedItems();
+        if (selected.size()!=2){
+            Alert alert=new Alert(Alert.AlertType.INFORMATION,"Select 2 tables");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                alert.close();
+            }
+        }else{
+            tableDifference(selected.get(0),selected.get(1),selected.get(0)+"_"+selected.get(1)+"_substracion");
+            tables.add(selected.get(0)+"_"+selected.get(1)+"_substracion");
+        }
     }
     @Override
     public void createDatabase(String name) {
@@ -321,16 +350,33 @@ public class MainController implements Initializable, IView {
 
     @Override
     public void tableIntersection(String table1, String table2, String newTableName) {
+        try {
+            DatabaseControllerDirect.getInstance().tableIntersection(currentDatabase,table1,table2,newTableName);
+        } catch (NonExistingTable nonExistingTable) {
+            //todo
+            nonExistingTable.printStackTrace();
+        } catch (TableAlreadyExsists tableAlreadyExsists) {
+            tableAlreadyExsists.printStackTrace();
+        }
 
     }
 
     @Override
     public void tableDifference(String table1, String table2, String newTableName) {
+        try {
+            DatabaseControllerDirect.getInstance().tableDifference(currentDatabase,table1,table2,newTableName);
+        } catch (NonExistingTable nonExistingTable) {
+            //todo
+            nonExistingTable.printStackTrace();
+        } catch (TableAlreadyExsists tableAlreadyExsists) {
+            tableAlreadyExsists.printStackTrace();
+        }
 
     }
 
     @Override
     public void showAllTables(String databaseName) {
+        tables.clear();
         List<String> tablesList = DatabaseControllerDirect.getInstance().getAllTables(databaseName);
         tables.addAll(tablesList);
 
