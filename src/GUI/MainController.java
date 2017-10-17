@@ -1,6 +1,8 @@
 package GUI;
 
+import itlab.module.exceptions.NonExistingColumn;
 import itlab.module.exceptions.NonExistingTable;
+import itlab.module.exceptions.TableAlreadyExsists;
 import itlab.module.exceptions.UnsupportedValueException;
 import itlab.service.controllers.DatabaseController;
 import itlab.service.controllers.DatabaseControllerDirect;
@@ -12,35 +14,43 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
-public class Controller implements Initializable, IView {
+public class MainController implements Initializable, IView {
     String currentDatabase = "";
+
     String currentTable = "";
 
     @FXML
     private TextField new_database_name;
+
     @FXML
     private ListView<String> all_databases_list;
     @FXML
     private ListView<String> tables_list;
     @FXML
     private TableView table;
-
     private ObservableList<String> tables;
+
     private ObservableList<String> databases;
     private ObservableList<ObservableList> data;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         databases = FXCollections.observableArrayList();
@@ -94,6 +104,49 @@ public class Controller implements Initializable, IView {
         removeTable(currentDatabase, tables_list.getSelectionModel().getSelectedItem());
     }
 
+    @FXML
+    private void openNewTablePane(ActionEvent event) {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource(
+                        "newTable.fxml"
+                )
+        );
+        Stage stage = new Stage(StageStyle.DECORATED);
+
+
+        try {
+            stage.setScene(new Scene((Pane) loader.load()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        loader.<NewTable>getController().setParentView(this);
+        loader.<NewTable>getController().setCurrentDB(this.currentDatabase);
+        stage.show();
+    }
+    @FXML
+    private void addEmptyRow(ActionEvent event){
+        Map<String,String> scheme=new HashMap<>();
+        try {
+           scheme=DatabaseControllerDirect.getInstance().getTableScheme(currentDatabase,currentTable);
+        } catch (NonExistingTable nonExistingTable) {
+            nonExistingTable.printStackTrace();
+        }
+        String UUID="";
+        try {
+           UUID = DatabaseControllerDirect.getInstance().addRowToTable(currentDatabase,currentTable,new HashMap<String,String>());
+        } catch (UnsupportedValueException e) {
+            e.printStackTrace();
+        } catch (NonExistingTable nonExistingTable) {
+            nonExistingTable.printStackTrace();
+        }
+        ObservableList<String> row = FXCollections.observableArrayList();
+        for (int i = 0; i < scheme.size(); i++) {
+            row.add("");
+        }
+        row.add(UUID);
+        data.add(row);
+
+    }
     @Override
     public void createDatabase(String name) {
         DatabaseControllerDirect.getInstance().createDatabase(name);
@@ -122,7 +175,16 @@ public class Controller implements Initializable, IView {
 
     @Override
     public void createTable(String databaseName, String tableName, Map<String, String> columns) {
-        DatabaseControllerDirect.getInstance().addTable(databaseName, tableName, columns);
+        try {
+            DatabaseControllerDirect.getInstance().addTable(databaseName, tableName, columns);
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Table already exsists or error in scheme");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                alert.close();
+            }
+        }
+        tables.add(tableName);
     }
 
     @Override
@@ -132,29 +194,60 @@ public class Controller implements Initializable, IView {
             table.getItems().clear();
             table.getColumns().clear();
             List<String> tableSchemeColumnNames = new ArrayList<String>(DatabaseControllerDirect.getInstance().getTableScheme(databaseName, tableName).keySet());
-            TableColumn uuidCol=new TableColumn("UUID");
-            uuidCol.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
+            TableColumn uuidCol = new TableColumn("UUID");
+            uuidCol.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
                 public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
                     return new SimpleStringProperty(param.getValue().get(tableSchemeColumnNames.size()).toString());
                 }
             });
             table.getColumns().add(uuidCol);
-            for (int i=0;i<tableSchemeColumnNames.size();i++
+            for (int i = 0; i < tableSchemeColumnNames.size(); i++
                     ) {
-                TableColumn column=new TableColumn(tableSchemeColumnNames.get(i));
-                final int j=i;
-                column.setCellValueFactory(new Callback<CellDataFeatures<ObservableList,String>,ObservableValue<String>>(){
+                TableColumn column = new TableColumn(tableSchemeColumnNames.get(i));
+                final int j = i;
+                column.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
                     public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
                         return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
+                column.setCellFactory(TextFieldTableCell.forTableColumn());
+                column.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent event) {
+                        ObservableList row = (ObservableList) event.getTableView().getItems().get(event.getTablePosition().getRow());
+                        String UUID = (String) (row).get(tableSchemeColumnNames.size());
+                        event.getTableColumn().getId();
+                        Map<String, String> rowUpdate = new HashMap<>();
+                        rowUpdate.put(event.getTableColumn().getText(),(String) event.getNewValue());
+                        try {
+                            DatabaseControllerDirect.getInstance().updateRowInTable(currentDatabase,currentTable,UUID,rowUpdate);
+                        } catch (UnsupportedValueException e) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Oops, unsuported value");
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.isPresent() && result.get() == ButtonType.OK) {
+                                alert.close();
+                            }
+                        } catch (NonExistingTable nonExistingTable) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "WTF?");
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.isPresent() && result.get() == ButtonType.OK) {
+                                alert.close();
+                            }    } catch (NonExistingColumn nonExistingColumn) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Colum dont exists?");
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.isPresent() && result.get() == ButtonType.OK) {
+                                alert.close();
+                            } }
+
                     }
                 });
 
                 table.getColumns().addAll(column);
             }
 
-            Map<String,Map<String,String>> rows=DatabaseControllerDirect.getInstance().getTableRowsAsMap(databaseName,tableName);
-            for (Map.Entry<String, Map<String, String>> entry:rows.entrySet()
-            ){
+            Map<String, Map<String, String>> rows = DatabaseControllerDirect.getInstance().getTableRowsAsMap(databaseName, tableName);
+            for (Map.Entry<String, Map<String, String>> entry : rows.entrySet()
+                    ) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 0; i < tableSchemeColumnNames.size(); i++) {
                     row.add(entry.getValue().get(tableSchemeColumnNames.get(i)));
@@ -185,6 +278,7 @@ public class Controller implements Initializable, IView {
     @Override
     public void removeTable(String databaseName, String tableName) {
         DatabaseControllerDirect.getInstance().removeTable(databaseName, tableName);
+        tables.remove(tableName);
     }
 
     @Override
@@ -220,6 +314,8 @@ public class Controller implements Initializable, IView {
             e.printStackTrace();
         } catch (NonExistingTable nonExistingTable) {
             nonExistingTable.printStackTrace();
+        } catch (NonExistingColumn nonExistingColumn) {
+            nonExistingColumn.printStackTrace();
         }
     }
 

@@ -1,5 +1,7 @@
 package itlab.view;
+import itlab.module.exceptions.NonExistingColumn;
 import itlab.module.exceptions.NonExistingTable;
+import itlab.module.exceptions.TableAlreadyExsists;
 import itlab.module.exceptions.UnsupportedValueException;
 import itlab.service.controllers.DatabaseControllerDirect;
 
@@ -107,7 +109,11 @@ public class ConsoleView implements IView {
 
     @Override
     public void createTable(String databaseName, String tableName, Map<String, String> columns) {
-        DatabaseControllerDirect.getInstance().addTable(databaseName, tableName, columns);
+        try {
+            DatabaseControllerDirect.getInstance().addTable(databaseName, tableName, columns);
+        } catch (TableAlreadyExsists tableAlreadyExsists) {
+            tableAlreadyExsists.printStackTrace();
+        }
     }
 
     @Override
@@ -168,6 +174,8 @@ public class ConsoleView implements IView {
             e.printStackTrace();
         } catch (NonExistingTable nonExistingTable) {
             nonExistingTable.printStackTrace();
+        } catch (NonExistingColumn nonExistingColumn) {
+            nonExistingColumn.printStackTrace();
         }
     }
 

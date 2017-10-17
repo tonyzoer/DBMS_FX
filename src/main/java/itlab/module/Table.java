@@ -52,8 +52,11 @@ public class Table implements Serializable {
         rows.remove(uuid);
     }
 
-    public void updateRow(String uuid, Map<String, String> values) throws UnsupportedValueException {
-        rows.replace(uuid, new Row(scheme, values));
+    public void updateRow(String uuid, Map<String, String> values) throws UnsupportedValueException, NonExistingColumn {
+        for (Map.Entry<String,String> entry:values.entrySet()
+             ) {
+            rows.get(uuid).setValue(entry.getKey(),entry.getValue(),scheme.columns.get(entry.getKey()));
+        }
     }
 
     public void updateRow(String uuid, String collumnName, String value) throws NonExistingColumn, UnsupportedValueException {

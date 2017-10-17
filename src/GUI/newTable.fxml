@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="GUI.NewTable">
+  <children>
+    <Button layoutX="290.0" layoutY="355.0" mnemonicParsing="false" onAction="#addColumn" text="add column" />
+    <TableView fx:id="scheme" editable="true" layoutX="14.0" layoutY="24.0" prefHeight="342.0" prefWidth="253.0" />
+    <Button  layoutX="523.0" layoutY="355.0" mnemonicParsing="false" text="Create" onAction="#createTable" />
+    <TextField fx:id="new_table_name" layoutX="332.0" layoutY="34.0" prefWidth="200.0" promptText="New Table Name" text="" />
+    <ListView fx:id="types_list" layoutX="278.0" layoutY="74.0" prefHeight="243.0" prefWidth="108.0" />
+  </children>
+</AnchorPane>

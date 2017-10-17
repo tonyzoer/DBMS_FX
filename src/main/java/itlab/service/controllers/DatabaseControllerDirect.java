@@ -3,18 +3,16 @@ package itlab.service.controllers;
 import itlab.module.Database;
 import itlab.module.Row;
 import itlab.module.Scheme;
+import itlab.module.exceptions.NonExistingColumn;
 import itlab.module.exceptions.NonExistingTable;
 import itlab.module.exceptions.TableAlreadyExsists;
 import itlab.module.exceptions.UnsupportedValueException;
 import itlab.module.types.Types;
 import itlab.service.helpers.DatabaseHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class DatabaseControllerDirect  implements DatabaseController {
+public class DatabaseControllerDirect implements DatabaseController {
     private static DatabaseControllerDirect ourInstance = new DatabaseControllerDirect();
     private Map<String, Database> dbInMemory = new HashMap<>();
 
@@ -53,14 +51,14 @@ public class DatabaseControllerDirect  implements DatabaseController {
 
     @Override
     public void loadDatabase(String name) {
-        if (!dbInMemory.containsKey(name)){
-        dbInMemory.put(name, new Database(name));
-        dbInMemory.get(name).load();
+        if (!dbInMemory.containsKey(name)) {
+            dbInMemory.put(name, new Database(name));
+            dbInMemory.get(name).load();
         }
     }
 
     @Override
-    public void addTable(String databaseName, String tableName, Map<String, String> columns) {
+    public void addTable(String databaseName, String tableName, Map<String, String> columns) throws TableAlreadyExsists {
         Database db = dbInMemory.get(databaseName);
         if (db != null) {
             Map<String, Types> collumnsTypes = new HashMap<>();
@@ -69,12 +67,8 @@ public class DatabaseControllerDirect  implements DatabaseController {
                 collumnsTypes.put(col.getKey(), Types.valueOf(col.getValue()));
             }
             Scheme scheme = new Scheme(collumnsTypes);
-            try {
-                db.createTable(tableName, scheme);
-            } catch (TableAlreadyExsists tableAlreadyExsists) {
-                //TODO Send another exception;
-                tableAlreadyExsists.printStackTrace();
-            }
+            db.createTable(tableName, scheme);
+
         }
     }
 
@@ -92,7 +86,7 @@ public class DatabaseControllerDirect  implements DatabaseController {
     @Override
     public Map<String, Map<String, String>> getTableRowsAsMap(String databaseName, String tableName) throws NonExistingTable {
         Map<String, Row> rows = dbInMemory.get(databaseName).getTable(tableName).getRows();
-        Map<String, Map<String,String>> rowsMap = new HashMap<>();
+        Map<String, Map<String, String>> rowsMap = new HashMap<>();
         for (Map.Entry<String, Row> row : rows.entrySet()
                 ) {
             rowsMap.put(row.getKey(), row.getValue().getValues());
@@ -122,8 +116,8 @@ public class DatabaseControllerDirect  implements DatabaseController {
     }
 
     @Override
-    public void addRowToTable(String databaseName, String tableName, Map<String, String> collumnValues) throws UnsupportedValueException, NonExistingTable {
-        dbInMemory.get(databaseName).getTable(tableName).addRow(collumnValues);
+    public String addRowToTable(String databaseName, String tableName, Map<String, String> collumnValues) throws UnsupportedValueException, NonExistingTable {
+        return dbInMemory.get(databaseName).getTable(tableName).addRow(collumnValues);
     }
 
     @Override
@@ -132,7 +126,7 @@ public class DatabaseControllerDirect  implements DatabaseController {
     }
 
     @Override
-    public void updateRowInTable(String databaseName, String tableName, String rowUUID, Map<String, String> collumnValues) throws UnsupportedValueException, NonExistingTable {
+    public void updateRowInTable(String databaseName, String tableName, String rowUUID, Map<String, String> collumnValues) throws UnsupportedValueException, NonExistingTable, NonExistingColumn {
         dbInMemory.get(databaseName).getTable(tableName).updateRow(rowUUID, collumnValues);
     }
 
@@ -153,7 +147,18 @@ public class DatabaseControllerDirect  implements DatabaseController {
 
     @Override
     public List<String> getAllTables(String databaseName) {
-        List<String> tables=new ArrayList<>(dbInMemory.get(databaseName).getTables().keySet());
-        return tables ;
-          }
+        List<String> tables = new ArrayList<>(dbInMemory.get(databaseName).getTables().keySet());
+        return tables;
+    }
+
+    @Override
+    public List<String> getAllTypes() {
+        Types[] types = Types.values();
+        List<String> typesStrings = new ArrayList<>();
+        for (Types t : types
+                ) {
+            typesStrings.add(t.toString());
+        }
+        return typesStrings;
+    }
 }
