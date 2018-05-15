@@ -10,7 +10,7 @@
     <build>
         <finalName>DBMS_FX</finalName>
         <plugins>
-            <plugin>
+            <plugin></test>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
